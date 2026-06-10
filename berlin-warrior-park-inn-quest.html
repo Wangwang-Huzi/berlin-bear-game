@@ -1,0 +1,2422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Berlin Warrior: Park Inn Quest</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #fff4dc;
+      --paper: #fffaf0;
+      --ink: #17263f;
+      --ink-2: #2d4266;
+      --red: #d84d42;
+      --gold: #f4be43;
+      --blue: #3d84c7;
+      --green: #5ea56c;
+      --sky: #a9dcff;
+      --shadow: rgba(23, 38, 63, 0.18);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(244, 190, 67, 0.38), transparent 28%),
+        radial-gradient(circle at 88% 15%, rgba(61, 132, 199, 0.24), transparent 32%),
+        linear-gradient(180deg, #fffaf0 0%, var(--cream) 48%, #ffe0a5 100%);
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: max(16px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom));
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: fixed;
+      left: -220px;
+      width: 170px;
+      height: 54px;
+      border: 4px solid var(--ink);
+      border-radius: 999px;
+      background: rgba(255, 250, 240, 0.88);
+      box-shadow: 0 8px 0 rgba(23, 38, 63, 0.08);
+      animation: cloudDrift 28s linear infinite;
+      pointer-events: none;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      bottom: 18px;
+      border: 4px solid var(--ink);
+      border-bottom: 0;
+      background: inherit;
+    }
+
+    .cloud::before {
+      left: 28px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .cloud::after {
+      left: 82px;
+      width: 68px;
+      height: 68px;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .cloud.one { top: 9%; animation-delay: -7s; }
+    .cloud.two { top: 20%; scale: 0.72; animation-duration: 34s; animation-delay: -18s; }
+    .cloud.three { top: 5%; scale: 0.55; animation-duration: 22s; animation-delay: -12s; }
+
+    @keyframes cloudDrift {
+      to { translate: calc(100vw + 470px) 0; }
+    }
+
+    .skyline {
+      position: fixed;
+      inset: auto 0 0;
+      height: 160px;
+      opacity: 0.28;
+      pointer-events: none;
+      background:
+        linear-gradient(to top, rgba(23, 38, 63, 0.28), transparent),
+        linear-gradient(90deg,
+          transparent 0 3%, var(--ink) 3% 8%, transparent 8% 11%,
+          var(--ink) 11% 17%, transparent 17% 22%,
+          var(--ink) 22% 29%, transparent 29% 34%,
+          var(--ink) 34% 43%, transparent 43% 47%,
+          var(--ink) 47% 54%, transparent 54% 60%,
+          var(--ink) 60% 68%, transparent 68% 72%,
+          var(--ink) 72% 80%, transparent 80% 84%,
+          var(--ink) 84% 93%, transparent 93%);
+      mask: linear-gradient(to top, #000 0 72%, transparent);
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, 100%);
+      min-height: min(780px, calc(100vh - 24px));
+    }
+
+    .screen {
+      display: none;
+      min-height: min(780px, calc(100vh - 24px));
+      animation: enter 260ms ease both;
+    }
+
+    .screen.active {
+      display: grid;
+      align-items: center;
+    }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(14px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card {
+      width: 100%;
+      border: 4px solid var(--ink);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 240, 0.94);
+      box-shadow: 0 22px 54px var(--shadow), 8px 8px 0 rgba(23, 38, 63, 0.12);
+      overflow: hidden;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+      gap: 22px;
+      align-items: center;
+      min-height: 690px;
+      padding: clamp(22px, 5vw, 54px);
+      background:
+        linear-gradient(135deg, rgba(216, 77, 66, 0.13), transparent 32%),
+        linear-gradient(315deg, rgba(61, 132, 199, 0.15), transparent 38%),
+        rgba(255, 250, 240, 0.94);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--gold);
+      box-shadow: 4px 4px 0 rgba(23, 38, 63, 0.12);
+      font-size: 13px;
+      font-weight: 1000;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 14px;
+      font-size: clamp(42px, 9vw, 86px);
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: clamp(30px, 6vw, 54px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 21px;
+      line-height: 1.08;
+    }
+
+    .lead {
+      max-width: 690px;
+      margin-bottom: 22px;
+      color: var(--ink-2);
+      font-size: clamp(17px, 2.1vw, 22px);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      min-height: 48px;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      padding: 12px 16px;
+      background: var(--paper);
+      box-shadow: 5px 5px 0 rgba(23, 38, 63, 0.13);
+      font-weight: 1000;
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); box-shadow: 6px 8px 0 rgba(23, 38, 63, 0.12); }
+    .btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 rgba(23, 38, 63, 0.13); }
+    .btn.primary { background: var(--red); color: #fffaf0; }
+    .btn.gold { background: var(--gold); }
+    .btn.blue { background: var(--blue); color: #fffaf0; }
+    .btn.green { background: var(--green); color: #fffaf0; }
+    .btn.ghost { background: rgba(255, 250, 240, 0.76); }
+    .btn:disabled {
+      opacity: 0.54;
+      filter: grayscale(0.65);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 3px 3px 0 rgba(23, 38, 63, 0.09);
+    }
+
+    .bear-stage,
+    .inn-stage {
+      display: grid;
+      place-items: center;
+      min-height: 430px;
+      border: 4px solid var(--ink);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 50% 78%, rgba(244, 190, 67, 0.35), transparent 45%),
+        linear-gradient(var(--sky) 0 57%, #7bb870 57% 100%);
+      box-shadow: inset 0 -15px 0 rgba(23, 38, 63, 0.08);
+      overflow: hidden;
+    }
+
+    .bear {
+      position: relative;
+      width: 190px;
+      height: 220px;
+      animation: idle 1.7s ease-in-out infinite;
+    }
+
+    @keyframes idle { 50% { transform: translateY(-8px); } }
+
+    .bear span { position: absolute; }
+    .bear .ear,
+    .bear .head,
+    .bear .body,
+    .bear .arm,
+    .bear .leg,
+    .bear .suitcase {
+      border: 5px solid var(--ink);
+      background: #a6673e;
+    }
+
+    .bear .ear {
+      top: 15px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+    }
+
+    .bear .ear.left { left: 24px; }
+    .bear .ear.right { right: 24px; }
+    .bear .head {
+      top: 32px;
+      left: 39px;
+      z-index: 1;
+      width: 112px;
+      height: 95px;
+      border-radius: 42px 42px 34px 34px;
+    }
+
+    .bear .snout {
+      left: 31px;
+      bottom: 16px;
+      width: 50px;
+      height: 30px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      background: #f0bd8c;
+    }
+
+    .bear .eye {
+      top: 34px;
+      width: 10px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+
+    .bear .eye.left { left: 31px; }
+    .bear .eye.right { right: 31px; }
+    .bear .nose {
+      left: 50%;
+      top: 58px;
+      width: 15px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ink);
+      transform: translateX(-50%);
+    }
+
+    .bear .body {
+      left: 44px;
+      bottom: 28px;
+      width: 102px;
+      height: 100px;
+      border-radius: 34px 34px 28px 28px;
+      background: #9d5f38;
+    }
+
+    .bear .scarf {
+      left: 50px;
+      top: 120px;
+      z-index: 2;
+      width: 92px;
+      height: 24px;
+      border: 4px solid var(--ink);
+      border-radius: 999px;
+      background: var(--red);
+    }
+
+    .bear .arm {
+      top: 120px;
+      z-index: 0;
+      width: 36px;
+      height: 70px;
+      border-radius: 22px;
+    }
+
+    .bear .arm.left { left: 16px; rotate: 18deg; }
+    .bear .arm.right { right: 13px; rotate: -13deg; }
+    .bear .leg {
+      bottom: 0;
+      width: 42px;
+      height: 55px;
+      border-radius: 20px 20px 14px 14px;
+    }
+
+    .bear .leg.left { left: 48px; }
+    .bear .leg.right { right: 48px; }
+    .bear .suitcase {
+      right: -11px;
+      bottom: 13px;
+      z-index: 2;
+      width: 58px;
+      height: 62px;
+      border-radius: 14px;
+      background: var(--gold);
+    }
+
+    .bear .suitcase::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: -17px;
+      width: 20px;
+      height: 18px;
+      border: 4px solid var(--ink);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 4px solid var(--ink);
+      background: rgba(255, 233, 189, 0.76);
+    }
+
+    .panel { padding: clamp(18px, 4vw, 36px); }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--paper);
+      box-shadow: 3px 3px 0 rgba(23, 38, 63, 0.09);
+      font-size: 13px;
+      font-weight: 1000;
+    }
+
+    .steps,
+    .map-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 20px 0; }
+    .map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .step,
+    .node,
+    .badge-card {
+      border: 3px solid var(--ink);
+      border-radius: 18px;
+      background: rgba(255, 250, 240, 0.84);
+      box-shadow: 5px 5px 0 rgba(23, 38, 63, 0.1);
+    }
+
+    .step {
+      padding: 16px;
+      font-weight: 900;
+      line-height: 1.36;
+    }
+
+    .step .icon {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 28px;
+    }
+
+    .map-wrap {
+      display: grid;
+      grid-template-columns: minmax(250px, 0.9fr) minmax(280px, 1.1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .park-inn {
+      position: relative;
+      width: 220px;
+      height: 320px;
+      border: 5px solid var(--ink);
+      border-radius: 18px 18px 8px 8px;
+      background: var(--red);
+      box-shadow: 12px 12px 0 rgba(23, 38, 63, 0.14);
+    }
+
+    .park-inn::before {
+      content: "PARK INN";
+      position: absolute;
+      left: 50%;
+      top: -47px;
+      width: 166px;
+      height: 47px;
+      display: grid;
+      place-items: center;
+      border: 5px solid var(--ink);
+      border-bottom: 0;
+      border-radius: 14px 14px 0 0;
+      background: var(--gold);
+      transform: translateX(-50%);
+      font-weight: 1000;
+    }
+
+    .window {
+      position: absolute;
+      width: 34px;
+      height: 28px;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      background: #ffeebd;
+      box-shadow: inset 0 -7px 0 rgba(61, 132, 199, 0.2);
+    }
+
+    .node {
+      min-height: 220px;
+      padding: 16px;
+      overflow: hidden;
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    .node.available:hover { transform: translateY(-4px); }
+    .node.locked { opacity: 0.58; filter: grayscale(0.75); }
+    .node.defeated { background: #fff4cc; }
+
+    .node-art {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .guardian-emoji,
+    .mini-badge {
+      display: grid;
+      place-items: center;
+      border: 4px solid var(--ink);
+      box-shadow: 5px 5px 0 rgba(23, 38, 63, 0.1);
+    }
+
+    .guardian-emoji {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      background: #fff4cf;
+      font-size: 34px;
+    }
+
+    .mini-badge {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--gold);
+      overflow: hidden;
+      font-size: 24px;
+    }
+
+    .mini-badge::after,
+    .big-badge::after {
+      content: "";
+      position: absolute;
+      inset: -40% auto auto -55%;
+      width: 42%;
+      height: 190%;
+      background: rgba(255, 255, 255, 0.66);
+      rotate: 24deg;
+      animation: shine 2.6s ease-in-out infinite;
+    }
+
+    @keyframes shine {
+      0%, 38% { translate: 0 0; opacity: 0; }
+      50% { opacity: 1; }
+      80%, 100% { translate: 260px 0; opacity: 0; }
+    }
+
+    .node p {
+      min-height: 54px;
+      margin-bottom: 12px;
+      color: var(--ink-2);
+      font-weight: 800;
+      line-height: 1.32;
+    }
+
+    .fight-card { background: rgba(255, 250, 240, 0.96); }
+
+    .fight-shell {
+      position: relative;
+      padding: 12px;
+      background: #ffe9bd;
+    }
+
+    .fight-hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .meter-card {
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      padding: 9px;
+      background: var(--paper);
+      box-shadow: 4px 4px 0 rgba(23, 38, 63, 0.1);
+    }
+
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 1000;
+    }
+
+    .bar {
+      height: 18px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: #f0d9b5;
+      overflow: hidden;
+    }
+
+    .fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #9bd96f);
+      transition: width 120ms linear;
+    }
+
+    .fill.boss { background: linear-gradient(90deg, var(--red), #ff9263); }
+
+    .canvas-wrap {
+      position: relative;
+      border: 4px solid var(--ink);
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--sky);
+      box-shadow: inset 0 -15px 0 rgba(23, 38, 63, 0.08);
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: calc(100vh - 180px);
+      min-height: 325px;
+      background: var(--sky);
+      touch-action: none;
+    }
+
+    .fight-message {
+      position: absolute;
+      left: 50%;
+      top: 14px;
+      width: min(88%, 720px);
+      transform: translateX(-50%);
+      padding: 10px 12px;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.88);
+      box-shadow: 4px 4px 0 rgba(23, 38, 63, 0.1);
+      font-weight: 1000;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .touch-controls {
+      position: absolute;
+      inset: auto 10px 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .touch-group {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .touch-btn {
+      width: clamp(50px, 12vw, 72px);
+      height: clamp(48px, 11vw, 66px);
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.82);
+      box-shadow: 4px 4px 0 rgba(23, 38, 63, 0.15);
+      font-size: clamp(19px, 5vw, 29px);
+      font-weight: 1000;
+      touch-action: none;
+    }
+
+    .touch-btn.active,
+    .touch-btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 rgba(23, 38, 63, 0.16);
+      background: var(--gold);
+    }
+
+    .badge-screen-wrap {
+      display: grid;
+      place-items: center;
+      padding: clamp(22px, 5vw, 50px);
+      text-align: center;
+    }
+
+    .badge-card {
+      max-width: 680px;
+      padding: clamp(20px, 5vw, 44px);
+      background:
+        radial-gradient(circle at 50% 22%, rgba(244, 190, 67, 0.3), transparent 34%),
+        rgba(255, 250, 240, 0.94);
+    }
+
+    .big-badge {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 154px;
+      height: 154px;
+      margin: 0 auto 18px;
+      border: 6px solid var(--ink);
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 9px 9px 0 rgba(23, 38, 63, 0.12);
+      font-size: 76px;
+      overflow: hidden;
+    }
+
+    .final-card {
+      padding: clamp(24px, 6vw, 62px);
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(244, 190, 67, 0.44), transparent 28%),
+        linear-gradient(180deg, rgba(169, 220, 255, 0.62), transparent 38%),
+        rgba(255, 250, 240, 0.94);
+    }
+
+    .final-badge {
+      display: grid;
+      place-items: center;
+      width: clamp(150px, 32vw, 230px);
+      height: clamp(150px, 32vw, 230px);
+      margin: 0 auto 18px;
+      border: 7px solid var(--ink);
+      border-radius: 50%;
+      background: conic-gradient(from 30deg, var(--gold), #fff4a8, var(--red), var(--blue), var(--gold));
+      box-shadow: 12px 12px 0 rgba(23, 38, 63, 0.12);
+      font-size: clamp(76px, 15vw, 120px);
+      animation: badgeFloat 1.6s ease-in-out infinite;
+    }
+
+    @keyframes badgeFloat { 50% { transform: translateY(-8px) rotate(2deg); } }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 5;
+      max-width: min(650px, calc(100vw - 24px));
+      padding: 12px 16px;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      background: var(--paper);
+      box-shadow: 6px 6px 0 rgba(23, 38, 63, 0.15);
+      font-weight: 1000;
+      text-align: center;
+      transform: translate(-50%, 120px);
+      opacity: 0;
+      transition: 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .touch-controls { opacity: 0.16; transition: opacity 160ms ease; }
+      .canvas-wrap:hover .touch-controls { opacity: 0.9; }
+    }
+
+    @media (max-width: 820px) {
+      .hero,
+      .map-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 18px;
+      }
+
+      .bear-stage,
+      .inn-stage { min-height: 285px; }
+      .bear { scale: 0.78; }
+      .park-inn { scale: 0.72; }
+      .steps,
+      .map-grid { grid-template-columns: 1fr; }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .stats { justify-content: flex-start; }
+      .fight-hud { grid-template-columns: 1fr; }
+      #gameCanvas { min-height: 380px; max-height: none; }
+    }
+
+    @media (max-width: 450px) {
+      .actions .btn { width: 100%; }
+      .touch-controls { gap: 8px; }
+      .touch-group { gap: 6px; }
+      .fight-message { top: 9px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="cloud one"></div>
+    <div class="cloud two"></div>
+    <div class="cloud three"></div>
+    <div class="skyline"></div>
+
+    <div class="app">
+      <section class="screen active" id="startScreen">
+        <div class="card hero">
+          <div>
+            <span class="eyebrow">🏨 Park Inn Boost Route</span>
+            <h1>Berlin Warrior:<br>Park Inn Quest</h1>
+            <p class="lead">Run through long Berlin-inspired side-scrolling routes, fight strange graffiti monsters, collect exactly three Park Inn boosts per level, and defeat landmark guardians at the finish.</p>
+            <div class="actions">
+              <button class="btn primary" data-screen="mapScreen">Start Adventure</button>
+              <button class="btn gold" data-screen="howScreen">How to Play</button>
+            </div>
+          </div>
+          <div class="bear-stage" aria-hidden="true">
+            <div class="bear">
+              <span class="ear left"></span><span class="ear right"></span>
+              <span class="head"><span class="eye left"></span><span class="eye right"></span><span class="nose"></span><span class="snout"></span></span>
+              <span class="scarf"></span><span class="body"></span>
+              <span class="arm left"></span><span class="arm right"></span>
+              <span class="leg left"></span><span class="leg right"></span>
+              <span class="suitcase"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="howScreen">
+        <div class="card">
+          <div class="topbar">
+            <div>
+              <span class="eyebrow">📘 Controls</span>
+              <h2>How to Play</h2>
+            </div>
+            <button class="btn ghost" data-screen="startScreen">Back</button>
+          </div>
+          <div class="panel">
+            <p class="lead">Each level is a full route before the boss. Survive gaps, platforms, traps, moving hazards, falling objects, graffiti monsters, and the final guardian arena.</p>
+            <div class="steps">
+              <div class="step"><span class="icon">⬅️➡️</span>A / Left Arrow and D / Right Arrow move the bear. The camera follows through a long map.</div>
+              <div class="step"><span class="icon">⬆️</span>W, Space, or Up Arrow jumps. Use platforms to cross gaps and avoid traps.</div>
+              <div class="step"><span class="icon">⭐</span>J shoots suitcase stars. Use them to defeat graffiti wall monsters and bosses.</div>
+              <div class="step"><span class="icon">💨</span>K dashes. Dash is vital for timing, knockback recovery, and dodging warning attacks.</div>
+              <div class="step"><span class="icon">🏨</span>Each level has exactly three Park Inn logo boosts. Each restores one third of max HP once.</div>
+              <div class="step"><span class="icon">🎨</span>Graffiti monsters patrol, jump, chase, and shoot paint blobs. Defeating them makes a paint splash.</div>
+            </div>
+            <div class="actions">
+              <button class="btn primary" data-screen="mapScreen">Choose a Route</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="mapScreen">
+        <div class="card">
+          <div class="topbar">
+            <div>
+              <span class="eyebrow">🗺️ Berlin Routes</span>
+              <h2>Choose a Landmark Route</h2>
+            </div>
+            <div class="stats" id="mapStats"></div>
+          </div>
+          <div class="panel map-wrap">
+            <div class="inn-stage">
+              <div class="park-inn" id="mapInn" aria-label="Park Inn logo landmark"></div>
+            </div>
+            <div>
+              <p class="lead">No home-base healing. Healing now comes from Park Inn logo boosts hidden along each dangerous route.</p>
+              <div class="map-grid" id="bossNodes"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="levelScreen">
+        <div class="card fight-card">
+          <div class="topbar">
+            <div>
+              <span class="eyebrow">🎮 Scrolling Action Level</span>
+              <h2 id="levelTitle">Landmark Route</h2>
+            </div>
+            <button class="btn ghost" id="leaveLevelBtn">Exit Route</button>
+          </div>
+          <div class="fight-shell">
+            <div class="fight-hud">
+              <div class="meter-card">
+                <div class="meter-label"><span>🧸 Berlin Bear</span><span id="playerHpText">100/100</span></div>
+                <div class="bar"><div class="fill" id="playerHpFill"></div></div>
+              </div>
+              <div class="meter-card">
+                <div class="meter-label"><span id="bossHpName">Boss waiting at route end</span><span id="bossHpText">Route</span></div>
+                <div class="bar"><div class="fill boss" id="bossHpFill"></div></div>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="gameCanvas" width="960" height="540" aria-label="Long side-scrolling Berlin action platformer"></canvas>
+              <div class="fight-message" id="fightMessage">Run the route. Collect Park Inn boosts. The boss waits at the end.</div>
+              <div class="touch-controls" aria-label="Mobile action controls">
+                <div class="touch-group">
+                  <button class="touch-btn" data-hold="left" aria-label="Move left">‹</button>
+                  <button class="touch-btn" data-hold="right" aria-label="Move right">›</button>
+                </div>
+                <div class="touch-group">
+                  <button class="touch-btn" data-action="jump" aria-label="Jump">↑</button>
+                  <button class="touch-btn" data-action="shoot" aria-label="Shoot">★</button>
+                  <button class="touch-btn" data-action="dash" aria-label="Dash">↯</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="badgeScreen">
+        <div class="card badge-screen-wrap">
+          <div class="badge-card">
+            <div class="big-badge" id="earnedBadgeIcon">🏅</div>
+            <span class="eyebrow">Badge Collected</span>
+            <h2 id="earnedBadgeName">Badge</h2>
+            <p class="lead" id="earnedBadgeText">You survived the route and defeated the guardian.</p>
+            <div class="actions" style="justify-content:center">
+              <button class="btn primary" data-screen="mapScreen">Continue to Map</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="finalScreen">
+        <div class="card final-card">
+          <div class="final-badge">🐻</div>
+          <span class="eyebrow">🌟 Final Reward</span>
+          <h2>Berlin Warrior Badge Unlocked</h2>
+          <p class="lead" style="margin-left:auto;margin-right:auto">You defeated Berlin's landmark guardians, collected every badge, and mastered the Park Inn boost routes. Your Berlin adventure is complete.</p>
+          <p class="lead" style="margin-left:auto;margin-right:auto">From the heart of Alexanderplatz, you discovered the spirit of Berlin.</p>
+          <div class="actions" style="justify-content:center">
+            <button class="btn gold" id="restartBtn">Play Again</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    /*
+      Berlin Warrior: Park Inn Quest
+      One-file real-time Canvas side-scrolling action platformer.
+      The player crosses a long route, collects exactly three Park Inn boosts,
+      fights graffiti wall monsters, and faces a landmark boss at the end.
+    */
+    (() => {
+      "use strict";
+
+      const VIEW_W = 960;
+      const VIEW_H = 540;
+      const WORLD_W = 4300;
+      const GROUND_Y = 456;
+      const MAX_HP = 100;
+      const BOSS_START_X = 3520;
+      const GRAVITY = 1650;
+
+      const bosses = [
+        {
+          id: "alexanderplatz",
+          name: "Alexanderplatz Chaos Guardian",
+          short: "Alexanderplatz",
+          difficulty: "Hard",
+          emoji: "🚋",
+          reward: "City Pulse Badge",
+          rewardIcon: "🌆",
+          hp: 135,
+          color: "#d84d42",
+          accent: "#f4be43",
+          damage: 12,
+          defeated: false,
+          unlock: () => true
+        },
+        {
+          id: "worldClock",
+          name: "World Clock Time Guardian",
+          short: "World Clock",
+          difficulty: "Hard+",
+          emoji: "🕰️",
+          reward: "Time Traveler Badge",
+          rewardIcon: "⏳",
+          hp: 150,
+          color: "#3d84c7",
+          accent: "#f4be43",
+          damage: 13,
+          defeated: false,
+          unlock: () => true
+        },
+        {
+          id: "tvTower",
+          name: "TV Tower Skyline Guardian",
+          short: "TV Tower",
+          difficulty: "Very Hard",
+          emoji: "📡",
+          reward: "Skyline Badge",
+          rewardIcon: "✨",
+          hp: 175,
+          color: "#586d8b",
+          accent: "#d84d42",
+          damage: 15,
+          defeated: false,
+          unlock: () => defeatedCount() >= 1
+        },
+        {
+          id: "cathedral",
+          name: "Berlin Cathedral History Guardian",
+          short: "Berlin Cathedral",
+          difficulty: "Champion",
+          emoji: "⛪",
+          reward: "History Badge",
+          rewardIcon: "📜",
+          hp: 205,
+          color: "#5ea56c",
+          accent: "#3d84c7",
+          damage: 17,
+          defeated: false,
+          unlock: () => byId("tvTower").defeated
+        }
+      ];
+
+      const state = {
+        hp: MAX_HP,
+        finalUnlocked: false,
+        screen: "startScreen",
+        level: null
+      };
+
+      const input = { left: false, right: false };
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+      const canvas = $("#gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const screens = $$(".screen");
+      const toast = $("#toast");
+      const bossNodes = $("#bossNodes");
+
+      function byId(id) {
+        return bosses.find((boss) => boss.id === id);
+      }
+
+      function defeatedCount() {
+        return bosses.filter((boss) => boss.defeated).length;
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function rectsHit(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => toast.classList.remove("show"), 2400);
+      }
+
+      function showScreen(id) {
+        stopLevel();
+        state.screen = id;
+        screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
+        renderUi();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function statPills() {
+        return `
+          <span class="pill">❤️ Route HP ${Math.ceil(state.hp)}/${MAX_HP}</span>
+          <span class="pill">🏅 Badges ${defeatedCount()}/4</span>
+          <span class="pill">🏨 Boosts: 3 per level</span>
+        `;
+      }
+
+      function renderUi() {
+        $("#mapStats").innerHTML = statPills();
+        renderMap();
+      }
+
+      function renderMap() {
+        bossNodes.innerHTML = bosses.map((boss) => {
+          const unlocked = boss.unlock();
+          const status = boss.defeated ? "defeated" : unlocked ? "available" : "locked";
+          const detail = boss.defeated
+            ? `${boss.reward} unlocked.`
+            : unlocked
+              ? `${boss.difficulty}. Long route, 3 Park Inn boosts, graffiti monsters, then the guardian.`
+              : boss.id === "tvTower"
+                ? "Defeat one early route to unlock this skyline challenge."
+                : "Defeat the TV Tower route before the cathedral opens.";
+          const buttonText = boss.defeated ? "Badge Collected" : unlocked ? "Start Route" : "Locked";
+
+          return `
+            <article class="node ${status}">
+              <div class="node-art">
+                <span class="guardian-emoji">${boss.emoji}</span>
+                <span class="mini-badge">${boss.rewardIcon}</span>
+              </div>
+              <h3>${boss.name}</h3>
+              <p>${detail}</p>
+              <button class="btn ${boss.defeated ? "gold" : "primary"}" data-boss="${boss.id}" ${!unlocked || boss.defeated ? "disabled" : ""}>${buttonText}</button>
+            </article>
+          `;
+        }).join("");
+
+        $$("[data-boss]").forEach((button) => {
+          button.addEventListener("click", () => startLevel(button.dataset.boss));
+        });
+      }
+
+      function makeGround() {
+        return [
+          { x: 0, y: GROUND_Y, w: 520, h: 90 },
+          { x: 650, y: GROUND_Y, w: 430, h: 90 },
+          { x: 1190, y: GROUND_Y, w: 560, h: 90 },
+          { x: 1880, y: GROUND_Y, w: 470, h: 90 },
+          { x: 2490, y: GROUND_Y, w: 530, h: 90 },
+          { x: 3180, y: GROUND_Y, w: 1120, h: 90 }
+        ];
+      }
+
+      function makePlatforms(offset) {
+        return [
+          { x: 260, y: 350, w: 190, h: 22 },
+          { x: 610, y: 336, w: 150, h: 22 },
+          { x: 880, y: 290, w: 180, h: 22 },
+          { x: 1180, y: 356, w: 170, h: 22 },
+          { x: 1450, y: 308, w: 180, h: 22 },
+          { x: 1690, y: 248, w: 135, h: 22 },
+          { x: 1990, y: 350, w: 210, h: 22 },
+          { x: 2300, y: 280, w: 160, h: 22 },
+          { x: 2635, y: 338, w: 140, h: 22 },
+          { x: 2885, y: 276, w: 180, h: 22 },
+          { x: 3260, y: 360, w: 185, h: 22 },
+          { x: 3670, y: 368, w: 180, h: 22 },
+          { x: 3910, y: 318, w: 130, h: 22 }
+        ].map((p, i) => ({ ...p, y: p.y + (i % 3 === offset ? 10 : 0) }));
+      }
+
+      function createLevel(boss) {
+        const variant = bosses.findIndex((b) => b.id === boss.id);
+        return {
+          running: true,
+          raf: 0,
+          lastTime: 0,
+          frame: 0,
+          cameraX: 0,
+          worldW: WORLD_W,
+          boss,
+          bossActive: false,
+          bossHp: boss.hp,
+          message: "Long route started. Watch gaps, traps, monsters, and boosts.",
+          messageTimer: 3,
+          shake: 0,
+          ground: makeGround(),
+          platforms: makePlatforms(variant % 3),
+          player: {
+            x: 90,
+            y: GROUND_Y - 66,
+            w: 44,
+            h: 66,
+            vx: 0,
+            vy: 0,
+            face: 1,
+            onGround: false,
+            shootCd: 0,
+            dashCd: 0,
+            dashTime: 0,
+            invuln: 1.1
+          },
+          bossActor: { x: 3860, y: GROUND_Y - 132, w: 132, h: 132, attackCd: 1.2 },
+          boosts: [
+            { x: 930, y: 220, w: 78, h: 64, taken: false },
+            { x: 1905, y: 286, w: 78, h: 64, taken: false },
+            { x: 3265, y: 286, w: 78, h: 64, taken: false }
+          ],
+          monsters: makeMonsters(variant),
+          movers: makeMovingHazards(variant),
+          falling: [],
+          warnings: [],
+          playerShots: [],
+          enemyShots: [],
+          bossHazards: [],
+          particles: [],
+          fallTimer: 1.4,
+          noShotTimer: 0,
+          pressureTimer: 1.7
+        };
+      }
+
+      function makeMonsters(variant) {
+        const specs = [
+          ["patrol", 700, GROUND_Y - 48, 650, 1010],
+          ["shooter", 1285, GROUND_Y - 48, 1190, 1660],
+          ["jumper", 1515, 260, 1450, 1635],
+          ["patrol", 2050, GROUND_Y - 48, 1920, 2310],
+          ["chaser", 2690, GROUND_Y - 48, 2520, 2970],
+          ["shooter", 3215, GROUND_Y - 48, 3180, 3455]
+        ];
+        return specs.map((s, i) => ({
+          type: s[0],
+          x: s[1],
+          y: s[2],
+          w: 46,
+          h: 48,
+          vx: (i % 2 ? -1 : 1) * (62 + variant * 5),
+          vy: 0,
+          minX: s[3],
+          maxX: s[4],
+          hp: s[0] === "chaser" ? 34 : 26,
+          maxHp: s[0] === "chaser" ? 34 : 26,
+          shootCd: 0.8 + i * 0.18,
+          jumpCd: 1.2,
+          onGround: false,
+          dead: false,
+          color: ["#e65b73", "#41a6b9", "#8b62c8", "#f09a38"][i % 4]
+        }));
+      }
+
+      function makeMovingHazards(variant) {
+        return [
+          { type: "roller", x: 520, y: GROUND_Y - 30, w: 34, h: 34, minX: 520, maxX: 640, vx: 160 + variant * 12, damage: 14 },
+          { type: "roller", x: 1090, y: GROUND_Y - 30, w: 34, h: 34, minX: 1085, maxX: 1190, vx: 175 + variant * 10, damage: 14 },
+          { type: "swing", x: 1830, y: 280, w: 36, h: 36, baseX: 1830, baseY: 280, phase: 0, damage: 15 },
+          { type: "roller", x: 2390, y: GROUND_Y - 30, w: 34, h: 34, minX: 2360, maxX: 2490, vx: 180 + variant * 12, damage: 15 },
+          { type: "swing", x: 3075, y: 260, w: 38, h: 38, baseX: 3075, baseY: 260, phase: 1.8, damage: 16 }
+        ];
+      }
+
+      function startLevel(id) {
+        const boss = byId(id);
+        if (!boss || boss.defeated || !boss.unlock()) return;
+        stopLevel();
+        state.hp = MAX_HP;
+        state.level = createLevel(boss);
+        state.screen = "levelScreen";
+        $("#levelTitle").textContent = `${boss.short} Route`;
+        screens.forEach((screen) => screen.classList.toggle("active", screen.id === "levelScreen"));
+        setMessage("Run the route. The boss appears at the end.", 2.8);
+        requestAnimationFrame(loop);
+      }
+
+      function stopLevel() {
+        if (state.level) {
+          state.level.running = false;
+          cancelAnimationFrame(state.level.raf);
+        }
+      }
+
+      function setMessage(text, duration = 1.6) {
+        if (!state.level) return;
+        state.level.message = text;
+        state.level.messageTimer = duration;
+      }
+
+      function loop(time) {
+        const level = state.level;
+        if (!level || !level.running) return;
+        const dt = Math.min(0.033, (time - (level.lastTime || time)) / 1000 || 0.016);
+        level.lastTime = time;
+        update(dt);
+        draw();
+        updateHud();
+        level.raf = requestAnimationFrame(loop);
+      }
+
+      function update(dt) {
+        const l = state.level;
+        const p = l.player;
+        l.frame += 1;
+        l.messageTimer -= dt;
+        l.shake = Math.max(0, l.shake - dt * 18);
+        if (l.messageTimer <= 0) {
+          l.message = l.bossActive ? "Boss arena active. Keep moving and shoot the guardian." : "Survive the route. Park Inn boosts restore +33% HP.";
+        }
+
+        p.shootCd = Math.max(0, p.shootCd - dt);
+        p.dashCd = Math.max(0, p.dashCd - dt);
+        p.dashTime = Math.max(0, p.dashTime - dt);
+        p.invuln = Math.max(0, p.invuln - dt);
+
+        const speed = p.dashTime > 0 ? 790 : 285;
+        if (input.left) {
+          p.vx = -speed;
+          p.face = -1;
+        } else if (input.right) {
+          p.vx = speed;
+          p.face = 1;
+        } else if (p.dashTime <= 0) {
+          p.vx *= Math.pow(0.001, dt);
+          if (Math.abs(p.vx) < 8) p.vx = 0;
+        }
+
+        p.vy += GRAVITY * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.x = clamp(p.x, 20, l.worldW - p.w - 24);
+        if (l.bossActive) {
+          p.x = clamp(p.x, bossArenaLeft(), l.bossActor.x - p.w - 10);
+        }
+
+        p.onGround = false;
+        l.ground.forEach((g) => collidePlatform(p, g));
+        l.platforms.forEach((plat) => collidePlatform(p, plat));
+
+        if (p.y > VIEW_H + 160) {
+          damagePlayer(24, "You fell into a gap. Recover fast.");
+          p.x = Math.max(50, l.cameraX + 120);
+          p.y = 120;
+          p.vx = 0;
+          p.vy = 0;
+        }
+
+        if (!l.bossActive && p.x > BOSS_START_X) {
+          l.bossActive = true;
+          l.cameraX = BOSS_START_X - 160;
+          setMessage(`${l.boss.name} appears at the end of the route!`, 2.4);
+        }
+
+        updateBoosts();
+        updateMonsters(dt);
+        updateMovingHazards(dt);
+        updateFalling(dt);
+        updateShots(dt);
+        updateBoss(dt);
+        updateParticles(dt);
+
+        const targetCam = clamp(p.x - 300, 0, l.worldW - VIEW_W);
+        l.cameraX += (targetCam - l.cameraX) * Math.min(1, dt * 5.6);
+        if (l.bossActive) l.cameraX = clamp(l.cameraX, BOSS_START_X - 280, l.worldW - VIEW_W);
+
+        if (state.hp <= 0) loseLevel();
+      }
+
+      function collidePlatform(body, plat) {
+        const wasAbove = body.y + body.h - body.vy * (1 / 60) <= plat.y + 8;
+        const horizontal = body.x + body.w > plat.x && body.x < plat.x + plat.w;
+        if (body.vy >= 0 && wasAbove && horizontal && body.y + body.h >= plat.y && body.y + body.h <= plat.y + 42) {
+          body.y = plat.y - body.h;
+          body.vy = 0;
+          body.onGround = true;
+        }
+      }
+
+      function jump() {
+        const l = state.level;
+        if (!l || state.screen !== "levelScreen") return;
+        const p = l.player;
+        if (p.onGround) {
+          p.vy = -735;
+          p.onGround = false;
+          spawnParticles(p.x + p.w / 2, p.y + p.h, "#fffaf0", 8);
+        }
+      }
+
+      function shoot() {
+        const l = state.level;
+        if (!l || state.screen !== "levelScreen") return;
+        const p = l.player;
+        if (p.shootCd > 0) return;
+        p.shootCd = 0.22;
+        if (l.bossActive) l.noShotTimer = 0;
+        l.playerShots.push({
+          x: p.x + (p.face > 0 ? p.w + 2 : -16),
+          y: p.y + 24,
+          w: 18,
+          h: 12,
+          vx: p.face * 680,
+          life: 1.25,
+          spin: 0
+        });
+      }
+
+      function dash() {
+        const l = state.level;
+        if (!l || state.screen !== "levelScreen") return;
+        const p = l.player;
+        if (p.dashCd > 0) return;
+        p.dashCd = 0.9;
+        p.dashTime = 0.16;
+        p.invuln = Math.max(p.invuln, 0.24);
+        p.vx = p.face * 840;
+        p.vy *= 0.45;
+        spawnParticles(p.x + p.w / 2, p.y + p.h / 2, "#3d84c7", 12);
+      }
+
+      function updateBoosts() {
+        const l = state.level;
+        const p = l.player;
+        l.boosts.forEach((boost) => {
+          if (!boost.taken && rectsHit(p, boost)) {
+            boost.taken = true;
+            state.hp = clamp(state.hp + MAX_HP / 3, 0, MAX_HP);
+            setMessage("Park Inn Boost +33% HP", 2.0);
+            spawnParticles(boost.x + 24, boost.y + 22, "#f4be43", 26);
+          }
+        });
+      }
+
+      function updateMonsters(dt) {
+        const l = state.level;
+        const p = l.player;
+        l.monsters.forEach((m) => {
+          if (m.dead) return;
+          const near = Math.abs(p.x - m.x) < 310;
+
+          if (m.type === "chaser" && near) {
+            m.vx += (p.x < m.x ? -1 : 1) * 460 * dt;
+            m.vx = clamp(m.vx, -155, 155);
+          } else {
+            if (m.x < m.minX) m.vx = Math.abs(m.vx);
+            if (m.x + m.w > m.maxX) m.vx = -Math.abs(m.vx);
+          }
+
+          if (m.type === "jumper") {
+            m.jumpCd -= dt;
+            if (m.jumpCd <= 0 && m.onGround) {
+              m.vy = -520;
+              m.jumpCd = rand(1.1, 2.0);
+            }
+          }
+
+          m.vy += GRAVITY * dt;
+          m.x += m.vx * dt;
+          m.y += m.vy * dt;
+          m.onGround = false;
+          l.ground.forEach((g) => collidePlatform(m, g));
+          l.platforms.forEach((plat) => collidePlatform(m, plat));
+
+          m.shootCd -= dt;
+          if ((m.type === "shooter" || (m.type === "chaser" && near)) && m.shootCd <= 0 && near) {
+            m.shootCd = m.type === "chaser" ? 1.25 : 1.65;
+            const dir = p.x < m.x ? -1 : 1;
+            l.enemyShots.push({
+              x: m.x + m.w / 2,
+              y: m.y + 18,
+              w: 20,
+              h: 16,
+              vx: dir * 280,
+              vy: rand(-35, 35),
+              life: 2.8,
+              color: m.color,
+              damage: 11
+            });
+          }
+
+          if (rectsHit(p, m)) damagePlayer(13, "Graffiti monster hit! Use dash and spacing.");
+        });
+
+        l.monsters = l.monsters.filter((m) => !m.remove);
+      }
+
+      function updateMovingHazards(dt) {
+        const l = state.level;
+        const p = l.player;
+        l.movers.forEach((h) => {
+          if (h.type === "roller") {
+            h.x += h.vx * dt;
+            if (h.x < h.minX || h.x + h.w > h.maxX) h.vx *= -1;
+          } else {
+            h.phase += dt * 2.2;
+            h.x = h.baseX + Math.cos(h.phase) * 84;
+            h.y = h.baseY + Math.sin(h.phase * 1.3) * 44;
+          }
+          if (rectsHit(p, h)) damagePlayer(h.damage, "Moving hazard clipped you.");
+        });
+      }
+
+      function updateFalling(dt) {
+        const l = state.level;
+        l.fallTimer -= dt;
+        const inRoute = l.player.x > 450 && l.player.x < BOSS_START_X - 220;
+        if (l.fallTimer <= 0 && inRoute) {
+          const x = l.player.x + rand(120, 360);
+          l.warnings.push({ type: "fall", x, y: 70, timer: 0.58, max: 0.58, route: true });
+          l.fallTimer = rand(1.15, 1.75);
+        }
+
+        l.warnings.forEach((w) => {
+          w.timer -= dt;
+          if (w.timer <= 0 && !w.done) {
+            w.done = true;
+            if (typeof w.spawn === "function") {
+              w.spawn();
+              l.shake = Math.max(l.shake, 0.12);
+            } else if (w.route) {
+              l.falling.push({ x: w.x - 18, y: -32, w: 36, h: 36, vx: rand(-35, 35), vy: rand(430, 520), life: 3, damage: 14 });
+            }
+          }
+        });
+        l.warnings = l.warnings.filter((w) => w.timer > -0.1);
+
+        l.falling.forEach((f) => {
+          f.x += f.vx * dt;
+          f.y += f.vy * dt;
+          f.vy += 420 * dt;
+          f.life -= dt;
+          if (rectsHit(l.player, f)) {
+            f.life = 0;
+            damagePlayer(f.damage, "Falling Berlin debris! Watch the warning markers.");
+          }
+          if (f.y > GROUND_Y + 30) {
+            f.life = 0;
+            spawnParticles(f.x + f.w / 2, GROUND_Y, "#d84d42", 8);
+          }
+        });
+        l.falling = l.falling.filter((f) => f.life > 0);
+      }
+
+      function updateShots(dt) {
+        const l = state.level;
+        l.playerShots.forEach((shot) => {
+          shot.x += shot.vx * dt;
+          shot.life -= dt;
+          shot.spin += dt * 12;
+
+          l.monsters.forEach((m) => {
+            if (!m.dead && shot.life > 0 && rectsHit(shot, m)) {
+              shot.life = 0;
+              m.hp -= 13;
+              spawnParticles(shot.x, shot.y, m.color, 9);
+              if (m.hp <= 0) {
+                m.dead = true;
+                m.remove = true;
+                spawnParticles(m.x + m.w / 2, m.y + m.h / 2, m.color, 28);
+              }
+            }
+          });
+
+          if (l.bossActive && shot.life > 0 && rectsHit(shot, l.bossActor)) {
+            shot.life = 0;
+            l.bossHp -= 10;
+            l.shake = 0.08;
+            spawnParticles(shot.x, shot.y, l.boss.accent, 12);
+          }
+        });
+        l.playerShots = l.playerShots.filter((shot) => shot.life > 0 && shot.x > -100 && shot.x < l.worldW + 100);
+
+        l.enemyShots.forEach((shot) => {
+          shot.x += shot.vx * dt;
+          shot.y += shot.vy * dt;
+          shot.life -= dt;
+          if (rectsHit(l.player, shot)) {
+            shot.life = 0;
+            damagePlayer(shot.damage, "Paint blob hit! Keep moving.");
+          }
+        });
+        l.enemyShots = l.enemyShots.filter((shot) => shot.life > 0);
+      }
+
+      function updateBoss(dt) {
+        const l = state.level;
+        if (!l.bossActive) return;
+        const boss = l.bossActor;
+        boss.y = GROUND_Y - boss.h + Math.sin(l.frame / 32) * 8;
+        l.noShotTimer += dt;
+        l.pressureTimer -= dt;
+        if (rectsHit(l.player, boss)) {
+          damagePlayer(l.boss.damage + 2, "The guardian body checked you. Keep distance and fire back.");
+        }
+        const nearLeftCorner = l.player.x < bossArenaLeft() + 95;
+        const nearRightCorner = l.player.x > l.bossActor.x - 170;
+        if (l.pressureTimer <= 0 && (l.noShotTimer > 2.1 || nearLeftCorner || nearRightCorner)) {
+          if (nearLeftCorner || nearRightCorner) warnBossCornerSweep();
+          else warnBossAimed();
+          l.pressureTimer = 1.9;
+        }
+        boss.attackCd -= dt;
+        if (boss.attackCd <= 0) {
+          chooseBossAttack();
+          boss.attackCd = rand(0.82, 1.3);
+        }
+
+        l.bossHazards.forEach((h) => {
+          if (h.type === "homing") {
+            const targetX = l.player.x + l.player.w / 2;
+            const targetY = l.player.y + l.player.h / 2;
+            const dx = targetX - (h.x + h.w / 2);
+            const dy = targetY - (h.y + h.h / 2);
+            const dist = Math.max(1, Math.hypot(dx, dy));
+            h.vx += (dx / dist) * h.turn * dt;
+            h.vy += (dy / dist) * h.turn * dt;
+            const speed = Math.hypot(h.vx, h.vy);
+            const maxSpeed = h.maxSpeed || 360;
+            if (speed > maxSpeed) {
+              h.vx = (h.vx / speed) * maxSpeed;
+              h.vy = (h.vy / speed) * maxSpeed;
+            }
+          }
+          h.x += h.vx * dt;
+          h.y += h.vy * dt;
+          h.life -= dt;
+          if (h.type === "fall") h.vy += 440 * dt;
+          if (rectsHit(l.player, h)) {
+            h.life = h.type === "laser" ? h.life : 0;
+            damagePlayer(h.damage, "Guardian attack landed. Dash through the warnings.");
+          }
+          if (h.y > GROUND_Y + 35 && h.type === "fall") h.life = 0;
+        });
+        l.bossHazards = l.bossHazards.filter((h) => h.life > 0 && h.x > BOSS_START_X - 360 && h.x < l.worldW + 180);
+
+        if (l.bossHp <= 0) winLevel();
+      }
+
+      function chooseBossAttack() {
+        const l = state.level;
+        const roll = Math.random();
+        if (roll < 0.24) warnBossAimed();
+        else if (roll < 0.43) warnBossLines();
+        else if (roll < 0.62) warnBossFalling();
+        else if (roll < 0.78) warnBossWave();
+        else if (roll < 0.9) warnBossCornerSweep();
+        else warnBossLaser();
+      }
+
+      function bossArenaLeft() {
+        return BOSS_START_X - 210;
+      }
+
+      function warnBossAimed() {
+        const l = state.level;
+        const p = l.player;
+        const targetX = p.x + p.w / 2;
+        const targetY = p.y + p.h / 2;
+        l.warnings.push({ type: "target", x: targetX, y: targetY, timer: 0.62, max: 0.62, boss: true, spawn: () => {
+          const startX = l.bossActor.x + 18;
+          const startY = l.bossActor.y + 58;
+          const dx = targetX - startX;
+          const dy = targetY - startY;
+          const dist = Math.max(1, Math.hypot(dx, dy));
+          l.bossHazards.push({
+            type: "homing",
+            x: startX,
+            y: startY,
+            w: 28,
+            h: 28,
+            vx: (dx / dist) * 260,
+            vy: (dy / dist) * 260,
+            turn: 470,
+            maxSpeed: 410,
+            damage: l.boss.damage + 1,
+            life: 3.2
+          });
+          l.bossHazards.push({
+            type: "orb",
+            x: startX,
+            y: startY + 36,
+            w: 22,
+            h: 22,
+            vx: -330,
+            vy: p.y < 270 ? 120 : -80,
+            damage: l.boss.damage,
+            life: 2.6
+          });
+        }});
+        setMessage("Boss warning: aimed paint signal! Move before it locks on.", 1.05);
+      }
+
+      function warnBossLines() {
+        const l = state.level;
+        for (let i = 0; i < 3; i += 1) {
+          const y = 190 + i * 72;
+          l.warnings.push({ type: "line", x: l.bossActor.x, y, timer: 0.55 + i * 0.06, max: 0.55, boss: true, spawn: () => {
+            l.bossHazards.push({ type: "orb", x: l.bossActor.x + 12, y, w: 26, h: 26, vx: -430, vy: rand(-22, 22), damage: l.boss.damage, life: 3 });
+          }});
+        }
+        setMessage("Boss warning: projectile lanes!", 1.0);
+      }
+
+      function warnBossFalling() {
+        const l = state.level;
+        for (let i = 0; i < 4; i += 1) {
+          const x = rand(BOSS_START_X + 80, l.worldW - 170);
+          l.warnings.push({ type: "fall", x, y: 70, timer: 0.68 + i * 0.05, max: 0.68, boss: true, spawn: () => {
+            l.bossHazards.push({ type: "fall", x: x - 18, y: -40, w: 38, h: 38, vx: rand(-24, 24), vy: rand(470, 560), damage: l.boss.damage + 1, life: 2.6 });
+          }});
+        }
+        setMessage("Boss warning: falling landmark pieces!", 1.0);
+      }
+
+      function warnBossWave() {
+        const l = state.level;
+        l.warnings.push({ type: "ground", x: BOSS_START_X, y: GROUND_Y - 42, timer: 0.7, max: 0.7, boss: true, spawn: () => {
+          l.bossHazards.push({ type: "wave", x: l.bossActor.x - 30, y: GROUND_Y - 44, w: 68, h: 44, vx: -420, vy: 0, damage: l.boss.damage + 2, life: 3.2 });
+          l.bossHazards.push({ type: "wave", x: bossArenaLeft() + 10, y: GROUND_Y - 44, w: 58, h: 44, vx: 300, vy: 0, damage: l.boss.damage + 1, life: 2.4 });
+        }});
+        setMessage("Boss warning: ground wave!", 1.0);
+      }
+
+      function warnBossCornerSweep() {
+        const l = state.level;
+        const left = bossArenaLeft();
+        const right = l.bossActor.x - 104;
+        l.warnings.push({ type: "corner", x: left, y: GROUND_Y - 150, timer: 0.72, max: 0.72, boss: true, spawn: () => {
+          l.bossHazards.push({ type: "zone", x: left, y: GROUND_Y - 150, w: 88, h: 150, vx: 0, vy: 0, damage: l.boss.damage + 3, life: 0.5 });
+          l.bossHazards.push({ type: "zone", x: right, y: GROUND_Y - 150, w: 92, h: 150, vx: 0, vy: 0, damage: l.boss.damage + 3, life: 0.5 });
+          l.bossHazards.push({ type: "orb", x: l.bossActor.x + 12, y: l.player.y + 20, w: 24, h: 24, vx: -460, vy: 0, damage: l.boss.damage, life: 2.5 });
+        }});
+        setMessage("Boss warning: corners are unsafe. Move inward!", 1.05);
+      }
+
+      function warnBossLaser() {
+        const l = state.level;
+        const y = rand(210, 330);
+        l.warnings.push({ type: "laser", x: BOSS_START_X, y, timer: 0.82, max: 0.82, boss: true, spawn: () => {
+          l.bossHazards.push({ type: "laser", x: BOSS_START_X + 35, y: y - 14, w: 610, h: 28, vx: 0, vy: 0, damage: l.boss.damage + 4, life: 0.34 });
+        }});
+        setMessage("Boss warning: skyline beam!", 1.0);
+      }
+
+      function damagePlayer(amount, text) {
+        const l = state.level;
+        const p = l.player;
+        if (p.invuln > 0) return;
+        state.hp -= amount;
+        p.invuln = 0.86;
+        p.vx = -p.face * 280;
+        p.vy = -270;
+        l.shake = 0.23;
+        setMessage(text, 1.35);
+        spawnParticles(p.x + p.w / 2, p.y + p.h / 2, "#d84d42", 16);
+      }
+
+      function spawnParticles(x, y, color, count) {
+        const l = state.level;
+        if (!l) return;
+        for (let i = 0; i < count; i += 1) {
+          l.particles.push({
+            x,
+            y,
+            vx: rand(-180, 180),
+            vy: rand(-250, 90),
+            r: rand(2, 6),
+            color,
+            life: rand(0.35, 0.85)
+          });
+        }
+      }
+
+      function updateParticles(dt) {
+        const l = state.level;
+        l.particles.forEach((p) => {
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 430 * dt;
+          p.life -= dt;
+        });
+        l.particles = l.particles.filter((p) => p.life > 0);
+      }
+
+      function winLevel() {
+        const l = state.level;
+        if (!l || !l.running) return;
+        l.running = false;
+        l.boss.defeated = true;
+        $("#earnedBadgeIcon").textContent = l.boss.rewardIcon;
+        $("#earnedBadgeName").textContent = l.boss.reward;
+        $("#earnedBadgeText").textContent = `You survived the ${l.boss.short} route, collected route boosts, defeated graffiti monsters, and beat ${l.boss.name}.`;
+        spawnParticles(l.bossActor.x + 60, l.bossActor.y + 60, "#f4be43", 36);
+        setTimeout(() => showScreen(defeatedCount() === bosses.length ? "finalScreen" : "badgeScreen"), 650);
+      }
+
+      function loseLevel() {
+        const l = state.level;
+        if (!l || !l.running) return;
+        l.running = false;
+        state.hp = MAX_HP;
+        showToast("Route failed. No badge earned. Try the timing again.");
+        setTimeout(() => showScreen("mapScreen"), 520);
+      }
+
+      function exitLevel() {
+        stopLevel();
+        state.level = null;
+        state.hp = MAX_HP;
+        input.left = false;
+        input.right = false;
+        showToast("Exited the route. Healing only happens from Park Inn boosts during levels.");
+        showScreen("mapScreen");
+      }
+
+      function updateHud() {
+        const l = state.level;
+        if (!l) return;
+        $("#playerHpText").textContent = `${Math.max(0, Math.ceil(state.hp))}/${MAX_HP}`;
+        $("#playerHpFill").style.width = `${clamp(state.hp / MAX_HP, 0, 1) * 100}%`;
+        if (l.bossActive) {
+          $("#bossHpName").textContent = l.boss.short;
+          $("#bossHpText").textContent = `${Math.max(0, Math.ceil(l.bossHp))}/${l.boss.hp}`;
+          $("#bossHpFill").style.width = `${clamp(l.bossHp / l.boss.hp, 0, 1) * 100}%`;
+        } else {
+          const progress = clamp(l.player.x / BOSS_START_X, 0, 1);
+          $("#bossHpName").textContent = "Route progress";
+          $("#bossHpText").textContent = `${Math.floor(progress * 100)}%`;
+          $("#bossHpFill").style.width = `${progress * 100}%`;
+        }
+        $("#fightMessage").textContent = l.message;
+      }
+
+      function draw() {
+        const l = state.level;
+        if (!l) return;
+        const sx = l.shake > 0 ? rand(-6, 6) * l.shake * 4 : 0;
+        const sy = l.shake > 0 ? rand(-4, 4) * l.shake * 4 : 0;
+        ctx.save();
+        ctx.translate(sx, sy);
+        drawBackground();
+        ctx.translate(-l.cameraX, 0);
+        drawWorld();
+        ctx.restore();
+      }
+
+      function drawBackground() {
+        const l = state.level;
+        const g = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+        g.addColorStop(0, "#9edcff");
+        g.addColorStop(0.62, "#d8f3ff");
+        g.addColorStop(0.63, "#f9ca5c");
+        g.addColorStop(1, "#6eac68");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+        ctx.save();
+        ctx.translate(-(l.cameraX * 0.22) % 620, 0);
+        for (let x = -160; x < VIEW_W + 720; x += 310) {
+          cloudBlob(x, 72, 70, 24);
+          cloudBlob(x + 170, 116, 54, 18);
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(-l.cameraX * 0.36, 0);
+        for (let x = 0; x < WORLD_W; x += 260) {
+          drawBuilding(x, 270 + (x % 3) * 18, 76 + (x % 4) * 12, 190, "rgba(23,38,63,0.14)");
+        }
+        drawTvTowerSilhouette(1450, 456);
+        drawParkInnBackdrop(260);
+        drawCathedralSilhouette(3100, 456);
+        ctx.restore();
+      }
+
+      function cloudBlob(x, y, w, h) {
+        ctx.fillStyle = "rgba(255,250,240,0.75)";
+        ctx.beginPath();
+        ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + w * 0.35, y - 12, w * 0.45, h * 1.05, 0, 0, Math.PI * 2);
+        ctx.ellipse(x - w * 0.35, y - 6, w * 0.36, h * 0.9, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawBuilding(x, y, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, h);
+      }
+
+      function drawTvTowerSilhouette(x, base) {
+        ctx.fillStyle = "rgba(23,38,63,0.16)";
+        ctx.fillRect(x, base - 255, 18, 255);
+        ctx.beginPath();
+        ctx.arc(x + 9, base - 260, 44, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(x + 3, base - 368, 12, 90);
+      }
+
+      function drawParkInnBackdrop(x) {
+        ctx.fillStyle = "rgba(216,77,66,0.18)";
+        ctx.fillRect(x, 220, 112, 236);
+        ctx.fillStyle = "rgba(244,190,67,0.23)";
+        ctx.fillRect(x + 16, 184, 82, 36);
+      }
+
+      function drawCathedralSilhouette(x, base) {
+        ctx.fillStyle = "rgba(23,38,63,0.15)";
+        ctx.fillRect(x, base - 130, 240, 130);
+        ctx.beginPath();
+        ctx.arc(x + 120, base - 130, 58, Math.PI, 0);
+        ctx.lineTo(x + 178, base - 94);
+        ctx.lineTo(x + 62, base - 94);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawWorld() {
+        const l = state.level;
+        l.ground.forEach((g) => drawPlatform(g.x, g.y, g.w, g.h, "#5ea56c", true));
+        l.platforms.forEach((p) => drawPlatform(p.x, p.y, p.w, p.h, "#7b6558", false));
+        drawBoosts();
+        drawMovingHazards();
+        drawWarnings();
+        drawFalling();
+        drawMonsters();
+        drawBoss();
+        drawShots();
+        drawPlayer();
+        drawParticles();
+        drawRouteMarkers();
+      }
+
+      function drawPlatform(x, y, w, h, color, ground) {
+        roundedRect(x, y, w, h, ground ? 0 : 8, color, !ground);
+        ctx.fillStyle = ground ? "rgba(255,250,240,0.28)" : "rgba(255,250,240,0.24)";
+        for (let i = x + 18; i < x + w - 20; i += 70) ctx.fillRect(i, y + 22, 34, 6);
+      }
+
+      function drawBoosts() {
+        const l = state.level;
+        l.boosts.forEach((b, i) => {
+          if (b.taken) return;
+          const bob = Math.sin(l.frame / 18 + i) * 7;
+          const glow = 0.5 + Math.sin(l.frame / 14 + i) * 0.18;
+          ctx.save();
+          ctx.translate(b.x + b.w / 2, b.y + b.h / 2 + bob);
+          ctx.globalAlpha = glow;
+          ctx.fillStyle = "#f4be43";
+          ctx.beginPath();
+          ctx.arc(0, 2, 48, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          roundedRect(-34, -28, 68, 52, 13, "#fffaf0", true);
+          ctx.fillStyle = "#d84d42";
+          roundedRect(-27, -21, 54, 25, 7, "#d84d42", false);
+          ctx.fillStyle = "#f4be43";
+          roundedRect(-25, 8, 50, 12, 5, "#f4be43", false);
+          ctx.fillStyle = "#17263f";
+          ctx.font = "1000 12px Trebuchet MS";
+          ctx.textAlign = "center";
+          ctx.fillText("PARK", 0, -7);
+          ctx.fillText("INN", 0, 21);
+          ctx.strokeStyle = "rgba(255,250,240,0.8)";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-18, -25);
+          ctx.lineTo(18, -25);
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+
+      function drawMovingHazards() {
+        const l = state.level;
+        l.movers.forEach((h) => {
+          ctx.save();
+          ctx.translate(h.x + h.w / 2, h.y + h.h / 2);
+          ctx.rotate(l.frame / 12);
+          roundedRect(-h.w / 2, -h.h / 2, h.w, h.h, 10, h.type === "roller" ? "#d84d42" : "#3d84c7", true);
+          ctx.fillStyle = "rgba(255,250,240,0.55)";
+          ctx.fillRect(-10, -4, 20, 8);
+          ctx.restore();
+        });
+      }
+
+      function drawWarnings() {
+        const l = state.level;
+        l.warnings.forEach((w) => {
+          const pulse = 0.38 + Math.sin(l.frame * 0.7) * 0.18;
+          ctx.save();
+          ctx.globalAlpha = pulse;
+          ctx.fillStyle = "#d84d42";
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 4;
+          if (w.type === "fall") {
+            ctx.beginPath();
+            ctx.arc(w.x, w.y, 24, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillRect(w.x - 3, w.y + 16, 6, GROUND_Y - w.y - 16);
+          } else if (w.type === "line") {
+            ctx.fillRect(BOSS_START_X - 40, w.y - 8, 760, 16);
+            ctx.strokeRect(BOSS_START_X - 40, w.y - 8, 760, 16);
+          } else if (w.type === "ground") {
+            ctx.fillRect(BOSS_START_X - 30, GROUND_Y - 42, 760, 42);
+            ctx.strokeRect(BOSS_START_X - 30, GROUND_Y - 42, 760, 42);
+          } else if (w.type === "laser") {
+            ctx.fillRect(BOSS_START_X + 35, w.y - 18, 610, 36);
+            ctx.strokeRect(BOSS_START_X + 35, w.y - 18, 610, 36);
+          } else if (w.type === "target") {
+            ctx.beginPath();
+            ctx.arc(w.x, w.y, 34, 0, Math.PI * 2);
+            ctx.moveTo(w.x - 48, w.y);
+            ctx.lineTo(w.x + 48, w.y);
+            ctx.moveTo(w.x, w.y - 48);
+            ctx.lineTo(w.x, w.y + 48);
+            ctx.stroke();
+          } else if (w.type === "corner") {
+            const left = bossArenaLeft();
+            const right = state.level.bossActor.x - 104;
+            ctx.fillRect(left, GROUND_Y - 150, 88, 150);
+            ctx.strokeRect(left, GROUND_Y - 150, 88, 150);
+            ctx.fillRect(right, GROUND_Y - 150, 92, 150);
+            ctx.strokeRect(right, GROUND_Y - 150, 92, 150);
+          }
+          ctx.restore();
+        });
+      }
+
+      function drawFalling() {
+        const l = state.level;
+        l.falling.forEach((f) => {
+          ctx.save();
+          ctx.translate(f.x + f.w / 2, f.y + f.h / 2);
+          ctx.rotate(l.frame / 13);
+          roundedRect(-f.w / 2, -f.h / 2, f.w, f.h, 9, "#f4be43", true);
+          ctx.restore();
+        });
+      }
+
+      function drawMonsters() {
+        const l = state.level;
+        l.monsters.forEach((m) => {
+          if (m.dead) return;
+          roundedRect(m.x, m.y, m.w, m.h, 15, m.color, true);
+          ctx.fillStyle = "#fffaf0";
+          ctx.beginPath();
+          ctx.arc(m.x + 15, m.y + 18, 7, 0, Math.PI * 2);
+          ctx.arc(m.x + 31, m.y + 17, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#17263f";
+          ctx.fillRect(m.x + 14, m.y + 18, 4, 4);
+          ctx.fillRect(m.x + 30, m.y + 17, 4, 4);
+          ctx.fillStyle = "rgba(255,250,240,0.55)";
+          ctx.fillRect(m.x + 9, m.y + 35, 28, 5);
+        });
+      }
+
+      function drawBoss() {
+        const l = state.level;
+        const b = l.bossActor;
+        if (!l.bossActive) {
+          ctx.save();
+          ctx.globalAlpha = 0.55;
+          roundedRect(BOSS_START_X + 210, 210, 260, 170, 30, "#fffaf0", true);
+          ctx.fillStyle = "#17263f";
+          ctx.font = "900 24px Trebuchet MS";
+          ctx.textAlign = "center";
+          ctx.fillText("Boss waits ahead", BOSS_START_X + 340, 295);
+          ctx.restore();
+          return;
+        }
+        drawBossVisual(l.boss.id, b.x, b.y + Math.sin(l.frame / 18) * 3, b.w, b.h, l.boss);
+      }
+
+      function drawBossVisual(id, x, y, w, h, boss) {
+        ctx.save();
+        if (id === "tvTower") {
+          roundedRect(x + 54, y + 18, 24, h - 18, 10, "#7f8fa6", true);
+          ctx.fillStyle = "rgba(244,190,67,0.45)";
+          ctx.beginPath();
+          ctx.arc(x + 66, y + 48, 58, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          roundedRect(x + 25, y + 33, 82, 36, 17, "#dfe7ee", true);
+          ctx.strokeStyle = boss.accent;
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.arc(x + 66, y + 48, 76, -0.25, 0.25);
+          ctx.arc(x + 66, y + 48, 94, -0.2, 0.2);
+          ctx.stroke();
+          roundedRect(x + 48, y - 22, 36, 52, 12, "#d84d42", true);
+          drawBossFace(x + 66, y + 50);
+        } else if (id === "worldClock") {
+          ctx.fillStyle = "rgba(61,132,199,0.25)";
+          ctx.beginPath();
+          ctx.arc(x + 66, y + 64, 64, 0, Math.PI * 2);
+          ctx.fill();
+          roundedRect(x + 53, y + 112, 26, 36, 8, "#6f8297", true);
+          ctx.beginPath();
+          ctx.arc(x + 66, y + 62, 56, 0, Math.PI * 2);
+          ctx.fillStyle = "#fffaf0";
+          ctx.fill();
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 5;
+          ctx.stroke();
+          ctx.strokeStyle = boss.color;
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(x + 66, y + 62);
+          ctx.lineTo(x + 66 + Math.cos(state.level.frame / 22) * 34, y + 62 + Math.sin(state.level.frame / 22) * 34);
+          ctx.moveTo(x + 66, y + 62);
+          ctx.lineTo(x + 66 + Math.cos(-state.level.frame / 38) * 24, y + 62 + Math.sin(-state.level.frame / 38) * 24);
+          ctx.stroke();
+          ctx.font = "900 9px Trebuchet MS";
+          ctx.fillStyle = "#17263f";
+          ctx.textAlign = "center";
+          ["BER", "TYO", "NYC", "RIO"].forEach((label, i) => {
+            const a = -Math.PI / 2 + i * Math.PI / 2;
+            ctx.fillText(label, x + 66 + Math.cos(a) * 43, y + 65 + Math.sin(a) * 43);
+          });
+          drawGear(x + 18, y + 106, 18, boss.accent);
+          drawGear(x + 113, y + 103, 15, boss.color);
+          drawBossFace(x + 66, y + 82);
+        } else if (id === "cathedral") {
+          roundedRect(x + 15, y + 60, 102, 74, 18, "#79bd82", true);
+          drawDome(x + 66, y + 60, 55, "#5ea56c");
+          drawDome(x + 26, y + 74, 27, "#4f9961");
+          drawDome(x + 106, y + 74, 27, "#4f9961");
+          ctx.fillStyle = boss.accent;
+          ctx.fillRect(x + 58, y + 7, 16, 46);
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x + 58, y + 7, 16, 46);
+          ctx.fillStyle = "#f4be43";
+          ctx.beginPath();
+          ctx.arc(x + 38, y + 95, 9, 0, Math.PI * 2);
+          ctx.arc(x + 94, y + 95, 9, 0, Math.PI * 2);
+          ctx.fill();
+          for (let i = 0; i < 3; i += 1) {
+            roundedRect(x + 116 + i * 13, y + 22 + i * 23, 24, 16, 4, "#fffaf0", true);
+          }
+          drawBossFace(x + 66, y + 96);
+        } else {
+          roundedRect(x + 18, y + 24, 96, 108, 22, boss.color, true);
+          roundedRect(x + 7, y + 5, 118, 34, 10, "#f4be43", true);
+          roundedRect(x + 28, y + 48, 76, 26, 9, "#3d84c7", true);
+          ctx.fillStyle = "#fffaf0";
+          ctx.font = "1000 13px Trebuchet MS";
+          ctx.textAlign = "center";
+          ctx.fillText("ALEX", x + 66, y + 27);
+          ctx.strokeStyle = "#f4be43";
+          ctx.lineWidth = 4;
+          for (let i = 0; i < 4; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(x - 8 + i * 36, y + 82);
+            ctx.lineTo(x + 18 + i * 36, y + 66);
+            ctx.stroke();
+          }
+          roundedRect(x + 20, y + 112, 92, 28, 12, "#2d4266", true);
+          drawBossFace(x + 66, y + 75);
+        }
+        ctx.restore();
+      }
+
+      function drawBossFace(cx, cy) {
+        ctx.fillStyle = "#17263f";
+        ctx.fillRect(cx - 18, cy - 7, 8, 8);
+        ctx.fillRect(cx + 10, cy - 7, 8, 8);
+        ctx.fillRect(cx - 10, cy + 13, 20, 5);
+      }
+
+      function drawGear(cx, cy, r, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(state.level.frame / 30);
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#17263f";
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 8; i += 1) {
+          ctx.rotate(Math.PI / 4);
+          ctx.fillRect(r - 3, -3, 9, 6);
+        }
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.38, 0, Math.PI * 2);
+        ctx.fillStyle = "#fffaf0";
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawDome(cx, cy, r, color) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, Math.PI, 0);
+        ctx.lineTo(cx + r, cy + 34);
+        ctx.lineTo(cx - r, cy + 34);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = "#17263f";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+      }
+
+      function drawShots() {
+        const l = state.level;
+        l.playerShots.forEach((shot) => {
+          ctx.save();
+          ctx.translate(shot.x + shot.w / 2, shot.y + shot.h / 2);
+          ctx.rotate(shot.spin);
+          ctx.fillStyle = "#f4be43";
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 3;
+          star(0, 0, 13, 6, 5);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        l.enemyShots.concat(l.bossHazards).forEach((h) => {
+          ctx.save();
+          ctx.fillStyle = h.color || (h.type === "laser" ? "rgba(216,77,66,0.76)" : l.boss.color);
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 4;
+          if (h.type === "laser") {
+            roundedRect(h.x, h.y, h.w, h.h, 14, "rgba(216,77,66,0.72)", true);
+          } else if (h.type === "wave") {
+            roundedRect(h.x, h.y, h.w, h.h, 16, l.boss.accent, true);
+          } else if (h.type === "zone") {
+            ctx.globalAlpha = 0.78;
+            roundedRect(h.x, h.y, h.w, h.h, 18, "rgba(216,77,66,0.72)", true);
+            ctx.fillStyle = "rgba(255,250,240,0.5)";
+            ctx.fillRect(h.x + 12, h.y + 12, h.w - 24, 8);
+            ctx.fillRect(h.x + 12, h.y + h.h - 24, h.w - 24, 8);
+          } else if (h.type === "homing") {
+            ctx.beginPath();
+            ctx.arc(h.x + h.w / 2, h.y + h.h / 2, h.w / 2 + 6, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(244,190,67,0.35)";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(h.x + h.w / 2, h.y + h.h / 2, h.w / 2, 0, Math.PI * 2);
+            ctx.fillStyle = l.boss.accent;
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(h.x + h.w / 2, h.y + h.h / 2, h.w / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
+      function drawPlayer() {
+        const l = state.level;
+        const p = l.player;
+        const blink = p.invuln > 0 && Math.floor(l.frame / 4) % 2 === 0;
+        if (blink) ctx.globalAlpha = 0.55;
+        ctx.save();
+        ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+        ctx.scale(p.face, 1);
+        if (p.dashTime > 0) {
+          ctx.fillStyle = "rgba(61,132,199,0.35)";
+          for (let i = 0; i < 4; i += 1) ctx.fillRect(-p.face * (i * 20 + 20), -22, 18, 44);
+        }
+        roundedRect(-20, -28, 40, 46, 16, "#a6673e", true);
+        roundedRect(-16, -52, 32, 31, 14, "#ad7047", true);
+        ctx.fillStyle = "#17263f";
+        ctx.fillRect(-8, -42, 5, 6);
+        ctx.fillRect(7, -42, 5, 6);
+        ctx.fillStyle = "#f0bd8c";
+        ctx.beginPath();
+        ctx.ellipse(0, -31, 11, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#17263f";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        roundedRect(-27, -8, 16, 38, 8, "#9d5f38", true);
+        roundedRect(10, -8, 16, 38, 8, "#9d5f38", true);
+        roundedRect(18, -2, 30, 34, 8, "#f4be43", true);
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawParticles() {
+        const l = state.level;
+        l.particles.forEach((p) => {
+          ctx.globalAlpha = clamp(p.life * 2, 0, 1);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      function drawRouteMarkers() {
+        const l = state.level;
+        ctx.fillStyle = "#17263f";
+        ctx.font = "900 17px Trebuchet MS";
+        ctx.textAlign = "center";
+        ctx.fillText("Boss Arena", BOSS_START_X + 330, GROUND_Y - 72);
+        ctx.fillText(`${l.boosts.filter((b) => b.taken).length}/3 Park Inn boosts`, l.cameraX + 150, 32);
+      }
+
+      function roundedRect(x, y, w, h, r, color, stroke) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        if (stroke) {
+          ctx.strokeStyle = "#17263f";
+          ctx.lineWidth = 4;
+          ctx.stroke();
+        }
+      }
+
+      function star(cx, cy, outer, inner, points) {
+        ctx.beginPath();
+        for (let i = 0; i < points * 2; i += 1) {
+          const r = i % 2 === 0 ? outer : inner;
+          const angle = -Math.PI / 2 + i * Math.PI / points;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      }
+
+      function restart() {
+        bosses.forEach((boss) => { boss.defeated = false; });
+        state.hp = MAX_HP;
+        state.finalUnlocked = false;
+        state.level = null;
+        input.left = false;
+        input.right = false;
+        showScreen("startScreen");
+        showToast("Quest reset. New Berlin routes await.");
+      }
+
+      function keyDown(event) {
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space"].includes(event.code)) event.preventDefault();
+        if (event.code === "ArrowLeft" || event.code === "KeyA") input.left = true;
+        if (event.code === "ArrowRight" || event.code === "KeyD") input.right = true;
+        if (event.code === "ArrowUp" || event.code === "KeyW" || event.code === "Space") jump();
+        if (event.code === "KeyJ") shoot();
+        if (event.code === "KeyK") dash();
+      }
+
+      function keyUp(event) {
+        if (event.code === "ArrowLeft" || event.code === "KeyA") input.left = false;
+        if (event.code === "ArrowRight" || event.code === "KeyD") input.right = false;
+      }
+
+      function bindTouchControls() {
+        $$("[data-hold]").forEach((button) => {
+          const key = button.dataset.hold;
+          const set = (active) => {
+            input[key] = active;
+            button.classList.toggle("active", active);
+          };
+          button.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            button.setPointerCapture(event.pointerId);
+            set(true);
+          });
+          button.addEventListener("pointerup", () => set(false));
+          button.addEventListener("pointercancel", () => set(false));
+          button.addEventListener("pointerleave", () => set(false));
+        });
+
+        $$("[data-action]").forEach((button) => {
+          button.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            button.classList.add("active");
+            if (button.dataset.action === "jump") jump();
+            if (button.dataset.action === "shoot") shoot();
+            if (button.dataset.action === "dash") dash();
+          });
+          button.addEventListener("pointerup", () => button.classList.remove("active"));
+          button.addEventListener("pointercancel", () => button.classList.remove("active"));
+          button.addEventListener("pointerleave", () => button.classList.remove("active"));
+        });
+      }
+
+      function drawInnWindows(target) {
+        if (!target || target.dataset.ready) return;
+        target.dataset.ready = "true";
+        for (let row = 0; row < 6; row += 1) {
+          for (let col = 0; col < 4; col += 1) {
+            const windowEl = document.createElement("span");
+            windowEl.className = "window";
+            windowEl.style.left = `${28 + col * 47}px`;
+            windowEl.style.top = `${28 + row * 42}px`;
+            target.appendChild(windowEl);
+          }
+        }
+      }
+
+      $$("[data-screen]").forEach((button) => {
+        button.addEventListener("click", () => showScreen(button.dataset.screen));
+      });
+      $("#restartBtn").addEventListener("click", restart);
+      $("#leaveLevelBtn").addEventListener("click", exitLevel);
+      window.addEventListener("keydown", keyDown);
+      window.addEventListener("keyup", keyUp);
+      window.addEventListener("blur", () => {
+        input.left = false;
+        input.right = false;
+      });
+
+      bindTouchControls();
+      drawInnWindows($("#mapInn"));
+      renderUi();
+    })();
+  </script>
+</body>
+</html>
